@@ -87,7 +87,7 @@ func (s *postgresDB) Close() error {
 	return s.db.Close()
 }
 
-func (s postgresDB) GetCount(url string) (int, error) {
+func (s postgresDB) GetViews(url string) (int, error) {
 	var count int
 	err := s.db.QueryRow("SELECT views FROM repos WHERE url = $1", url).Scan(&count)
 	if err == sql.ErrNoRows {
@@ -96,7 +96,7 @@ func (s postgresDB) GetCount(url string) (int, error) {
 	return count, err
 }
 
-func (s postgresDB) IncrementCount(url string) error {
+func (s postgresDB) IncrementViews(url string) error {
 	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES ($1, $2) ON CONFLICT(url) DO UPDATE SET views = repos.views + 1", url, 1)
 	if err != nil {
 		return fmt.Errorf("failed to increment count: %w", err)

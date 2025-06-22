@@ -10,22 +10,28 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"repo-views-counter-pgsql/internal/db"
+	"repo-view-counter/internal/badge"
+	"repo-view-counter/internal/db"
 )
 
 type Server struct {
 	port int
 
-	db db.Database
+	db           db.Database
+	badgeService badge.Service
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	databaseDriver := os.Getenv("DATABASE_DRIVER")
+
+	db := db.NewDatabase(databaseDriver)
+	badgeService := badge.NewService(db)
 	NewServer := &Server{
 		port: port,
 
-		db: db.NewDatabase(databaseDriver),
+		db:           db,
+		badgeService: badgeService,
 	}
 
 	// Declare Server config
@@ -37,14 +43,8 @@ func NewServer() *http.Server {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	log.Printf("Starting Go Reka service on port %d...\n", port)
-	log.Println(`
- ______     ______        ______     ______   __    
-/\  ___\   /\  __ \      /\  __ \   /\  == \ /\ \   
-\ \ \__ \  \ \ \/\ \     \ \  __ \  \ \  _-/ \ \ \  
- \ \_____\  \ \_____\     \ \_\ \_\  \ \_\    \ \_\ 
-  \/_____/   \/_____/      \/_/\/_/   \/_/     \/_/ 
-  		    R E K A`)
+	log.Printf("Starting service on port %d...\n", port)
+	log.Println(`R E K A`)
 
 	return server
 }

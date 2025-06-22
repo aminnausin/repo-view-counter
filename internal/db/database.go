@@ -15,8 +15,8 @@ var (
 )
 
 type Database interface {
-	GetCount(url string) (int, error)
-	IncrementCount(url string) error
+	GetViews(url string) (int, error)
+	IncrementViews(url string) error
 
 	// Health returns a map of health status information.
 	// The keys and values in the map are service-specific.

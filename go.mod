@@ -1,8 +1,9 @@
-module repo-views-counter-pgsql
+module repo-view-counter
 
 go 1.23.5
 
 require (
+	github.com/dustin/go-humanize v1.0.1
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
 	github.com/testcontainers/testcontainers-go v0.37.0
@@ -23,7 +24,6 @@ require (
 	github.com/docker/docker v28.0.1+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.8.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect

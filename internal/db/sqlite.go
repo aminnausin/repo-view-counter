@@ -90,7 +90,7 @@ func (s *sqliteDB) Close() error {
 	return s.db.Close()
 }
 
-func (s sqliteDB) GetCount(url string) (int, error) {
+func (s sqliteDB) GetViews(url string) (int, error) {
 	var count int
 	err := s.db.QueryRow("SELECT views FROM repos WHERE url = ?", url).Scan(&count)
 	if err == sql.ErrNoRows {
@@ -99,7 +99,7 @@ func (s sqliteDB) GetCount(url string) (int, error) {
 	return count, err
 }
 
-func (s sqliteDB) IncrementCount(url string) error {
+func (s sqliteDB) IncrementViews(url string) error {
 	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES (?, ?) ON CONFLICT(url) DO UPDATE SET views = views + 1", url, 1)
 
 	if err != nil {

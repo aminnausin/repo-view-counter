@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"repo-views-counter-pgsql/internal/server"
+	"repo-view-counter/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
