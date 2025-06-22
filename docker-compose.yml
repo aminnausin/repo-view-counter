@@ -8,7 +8,7 @@ services:
     ports:
     - ${PORT}:${PORT}
     environment:
-      APP_ENV: ${APP_ENV}
+      APP_ENV: prod
       PORT: ${PORT}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -16,36 +16,13 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_SCHEMA: ${DB_SCHEMA}
-      DB_URL: ${DB_URL}
+      DB_URL: /app/db/reka.db
+      DATABASE_DRIVER: sqlite
     volumes:
-    - sqlite_bp:/app/db
-    depends_on:
-      psql_bp:
-        condition: service_healthy
+    - sqlite:/app/db
     networks:
     - blueprint
-  psql_bp:
-    image: postgres:latest
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-    - "${DB_PORT}:5432"
-    volumes:
-    - psql_volume_bp:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}'" ]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-    networks:
-    - blueprint
-
 volumes:
-  psql_volume_bp:
-  sqlite_bp:
+  sqlite:
 networks:
   blueprint:

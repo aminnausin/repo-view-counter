@@ -27,6 +27,22 @@ func NewPostgresDB() Database {
 	}
 }
 
+func (s *postgresDB) CreateSchema() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS repos (
+		id SERIAL PRIMARY KEY,
+		url TEXT NOT NULL UNIQUE,
+		views INTEGER NOT NULL DEFAULT 0,
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+		updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_repos_url ON repos (url);
+	`
+	_, err := s.db.Exec(query)
+	return err
+}
+
 // Health checks the health of the database connection by pinging the database.
 // It returns a map with keys indicating various health statistics.
 func (s *postgresDB) Health() map[string]string {
@@ -97,7 +113,7 @@ func (s postgresDB) GetViews(url string) (int, error) {
 }
 
 func (s postgresDB) IncrementViews(url string) error {
-	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES ($1, $2) ON CONFLICT(url) DO UPDATE SET views = repos.views + 1", url, 1)
+	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES ($1, 1) ON CONFLICT(url) DO UPDATE SET views = repos.views + 1, updated_at = CURRENT_TIMESTAMP", url)
 	if err != nil {
 		return fmt.Errorf("failed to increment count: %w", err)
 	}

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -18,6 +20,8 @@ type sqliteDB struct {
 }
 
 func NewSqliteDB() Database {
+	_ = os.MkdirAll(filepath.Dir(dburl), os.ModePerm)
+
 	db, err := sql.Open("sqlite", dburl)
 	if err != nil {
 		// This will not be a connection error, but a DSN parse error or
@@ -28,6 +32,23 @@ func NewSqliteDB() Database {
 	return &sqliteDB{
 		db: db,
 	}
+}
+
+func (s *sqliteDB) CreateSchema() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS repos (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		url TEXT NOT NULL UNIQUE,
+		views INTEGER NOT NULL DEFAULT 0,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_repos_url ON repos (url);
+	`
+	_, err := s.db.Exec(query)
+
+	return err
 }
 
 // Health checks the health of the database connection by pinging the database.
@@ -100,7 +121,7 @@ func (s sqliteDB) GetViews(url string) (int, error) {
 }
 
 func (s sqliteDB) IncrementViews(url string) error {
-	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES (?, ?) ON CONFLICT(url) DO UPDATE SET views = views + 1", url, 1)
+	_, err := s.db.Exec("INSERT INTO repos (url, views) VALUES (?, 1) ON CONFLICT(url) DO UPDATE SET views = views + 1, updated_at = CURRENT_TIMESTAMP", url)
 
 	if err != nil {
 		return fmt.Errorf("failed to increment count: %w", err)

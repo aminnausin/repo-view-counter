@@ -26,6 +26,11 @@ func NewServer() *http.Server {
 	databaseDriver := os.Getenv("DATABASE_DRIVER")
 
 	db := db.NewDatabase(databaseDriver)
+
+	if err := db.CreateSchema(); err != nil {
+		log.Fatalf("Failed to initialize schema: %v", err)
+	}
+
 	badgeService := badge.NewService(db)
 	NewServer := &Server{
 		port: port,

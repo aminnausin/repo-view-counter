@@ -15,6 +15,7 @@ var (
 )
 
 type Database interface {
+	CreateSchema() error
 	GetViews(url string) (int, error)
 	IncrementViews(url string) error
 
