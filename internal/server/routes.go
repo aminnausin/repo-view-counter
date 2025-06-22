@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"repo-view-counter/internal/request"
+	"repo-view-counter/internal/badge"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	// Register routes
-	mux.HandleFunc("/", s.badgeHandler)
+	mux.HandleFunc("/", badge.Handler(s.badgeService))
 
 	mux.HandleFunc("/health", s.healthHandler)
 
@@ -36,21 +36,6 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 		// Proceed with the next handler
 		next.ServeHTTP(w, r)
 	})
-}
-
-func (s *Server) badgeHandler(w http.ResponseWriter, r *http.Request) {
-	req := request.NewBadgeRequest(r)
-
-	svg, err := s.badgeService.HandleBadge(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("Content-Type", "image/svg+xml")
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(svg))
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
