@@ -1,11 +1,23 @@
 package server
 
 import (
+	"compress/gzip"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"repo-view-counter/internal/badge"
+	"strings"
 )
+
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
 
 func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
@@ -16,7 +28,22 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/health", s.healthHandler)
 
 	// Wrap the mux with CORS middleware
-	return s.corsMiddleware(mux)
+	return s.gzipMiddleware(s.corsMiddleware(mux))
+}
+
+func (s *Server) gzipMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		gzw := gzipResponseWriter{Writer: gz, ResponseWriter: w}
+		next.ServeHTTP(gzw, r)
+	})
 }
 
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {

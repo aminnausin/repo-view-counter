@@ -2,6 +2,7 @@ package request
 
 import (
 	"net/http"
+	"strings"
 )
 
 type BadgeRequest struct {
@@ -15,12 +16,12 @@ type BadgeRequest struct {
 func NewBadgeRequest(r *http.Request) BadgeRequest {
 	query := r.URL.Query()
 
-	label := query.Get("label")
+	label := strings.ToLower(strings.TrimSpace(query.Get("label")))
 	if label == "" {
-		label = "Views"
+		label = "views"
 	}
 
-	style := query.Get("style")
+	style := strings.ToLower(query.Get("style"))
 	if style == "" {
 		style = "default"
 	}
@@ -32,7 +33,7 @@ func NewBadgeRequest(r *http.Request) BadgeRequest {
 
 	return BadgeRequest{
 		UserAgent:  r.UserAgent(),
-		Repository: query.Get("repo"),
+		Repository: strings.ToLower(strings.TrimSpace(query.Get("repo"))),
 		Label:      label,
 		Colour:     colour,
 		Style:      style,

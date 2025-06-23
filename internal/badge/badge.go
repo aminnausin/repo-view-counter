@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"repo-view-counter/internal/db"
 	"repo-view-counter/internal/request"
+	"strconv"
 )
 
 var repoPattern = regexp.MustCompile(`^[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$`)
@@ -52,7 +53,8 @@ func Handler(s Service) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "image/svg+xml")
-		w.Header().Set("Cache-Control", "no-store, must-revalidate")
+		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=60")
+		w.Header().Set("Content-Length", strconv.Itoa(len(svg)))
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(svg))
 	}

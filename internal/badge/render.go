@@ -18,6 +18,8 @@ const padding = 10.0
 //go:embed templates/*
 var templateFS embed.FS
 
+var templates = template.Must(template.ParseFS(templateFS, "templates/*.tmpl"))
+
 type BadgeData struct {
 	Label  string
 	LabelW string
@@ -30,13 +32,11 @@ type BadgeData struct {
 }
 
 func RenderBadgeSVG(req request.BadgeRequest, views int) string {
-	style := sanitizeStyle(req.Style)
-	filename := "templates/" + style + ".svg.tmpl"
+	filename := req.Style + ".svg.tmpl"
 
-	tmpl, err := template.ParseFS(templateFS, filename)
-	if err != nil {
-		log.Println("Template parse error:", err)
-		return ""
+	tmpl := templates.Lookup(filename)
+	if tmpl == nil {
+		tmpl = templates.Lookup("default.svg.tmpl") // fallback
 	}
 
 	viewsStr := humanize.Comma(int64(views))
@@ -63,15 +63,6 @@ func RenderBadgeSVG(req request.BadgeRequest, views int) string {
 	log.Printf("Got %d views for %s\n", views, req.Repository)
 
 	return buf.String()
-}
-
-func sanitizeStyle(style string) string {
-	_, err := templateFS.Open(fmt.Sprintf("templates/%s.svg", style))
-	if err != nil {
-		return "default"
-	}
-
-	return style
 }
 
 func estimateTextWidth(text string) (width float64) {
