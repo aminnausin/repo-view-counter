@@ -53,7 +53,9 @@ func Handler(s Service) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "image/svg+xml")
-		w.Header().Set("Cache-Control", "public, max-age=300, stale-while-revalidate=60")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
 		w.Header().Set("Content-Length", strconv.Itoa(len(svg)))
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(svg))
