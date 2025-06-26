@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       target: prod
     restart: unless-stopped
+    container_name: reka
     ports:
     - ${PORT}:${PORT}
     environment:
@@ -20,9 +21,9 @@ services:
       DATABASE_DRIVER: sqlite
     volumes:
     - sqlite:/app/db
-    networks:
-    - blueprint
 volumes:
   sqlite:
 networks:
-  blueprint:
+  default:
+    external: true
+    name: proxy-network
