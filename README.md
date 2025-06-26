@@ -2,6 +2,8 @@
 
 ```R E K A```
 
+<img src="https://repo-view-counter.nausin.me/?repo=aminnausin/repo-view-counter&colour=F9322C" alt="view count">
+
 A simple image request based view counter for your repositories!
 
 ## Getting Started
